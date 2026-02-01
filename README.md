@@ -86,6 +86,13 @@ Add these records:
 
 ddclient will auto-update them.
 
+## Local DNS Configuration (AdGuard Home)
+
+AdGuard Home is now configured as the local DNS server, managed declaratively via NixOS.
+
+- **Wildcard Resolution**: All subdomains of `*.husmann.me` are locally resolved to your server's internal IP address (e.g., `192.168.3.100`), ensuring internal network detection for services behind Traefik.
+- **Web Interface**: The AdGuard Home administration UI is accessible at `dns.husmann.me`, proxied by Traefik, and restricted to your local network.
+
 ## Service Access
 
 | Service | Domain | Access |
@@ -97,6 +104,6 @@ ddclient will auto-update them.
 ## Updates
 
 ```bash
-nix run nixpkgs#nixos-rebuild -- --flake .#home --target-host leon@192.168.3.100 --build-host leon@192.168.3.100 --sudo boot
+nix run nixpkgs#nixos-rebuild -- --flake .#home --target-host leon@192.168.3.100 --build-host leon@192.168.3.100 --ask-sudo-password boot
 ssh leon@192.168.3.100 "sudo reboot"
 ```

@@ -24,4 +24,7 @@ These rules are strict and supersede general guidelines when specific to the con
     *   Maintain consistent naming conventions (`*.home.local` for private, `*.husmann.me` for public).
     *   Adhere to existing code style, formatting, and structure.
 
+6.  **COMMIT AND DEPLOYMENT**:
+    *   NEVER commit or deploy changes to the repository or any remote system without explicit, specific instruction from the user.
+
 By strictly following these rules, I aim to deliver configurations that are clean, secure, maintainable, and easy to understand.

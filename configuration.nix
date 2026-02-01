@@ -5,34 +5,12 @@
     inputs.disko.nixosModules.default
     ./disko.nix
     ./modules/openvpn.nix
-    ./modules/dns.nix
     ./modules/traefik.nix
     ./modules/ddns.nix
     ./modules/fail2ban.nix
+    ./modules/adguardhome.nix
     ./hardware-configuration.nix
   ];
-
-  users.groups.acme = {};
-
-  security.sudo.wheelNeedsPassword = false;
-
-  age.secrets.cloudflare-token = {
-    file = ./secrets/cloudflare-token.age;
-    mode = "400";
-  };
-
-  age.secrets.cloudflare-env = {
-    file = ./secrets/cloudflare-env.age;
-    mode = "400";
-  };
-
-  age.secrets.traefik-auth = {
-    file = ./secrets/traefik-auth.age;
-    mode = "400";
-    owner = "traefik";
-  };
-
-  age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -44,10 +22,26 @@
   networking.hostName = "home";
   networking.networkmanager.enable = true;
 
+  networking.nameservers = [ "127.0.0.1" ];
+
+  services.dnsmasq.enable = false; # Explicitly disable dnsmasq to avoid port conflict with AdGuard Home.
+
+  users.groups.acme = {};
+
+  security.sudo.wheelNeedsPassword = false;
+
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 80 443 ];
     allowedUDPPorts = [ 1194 ];
+    extraCommands = ''
+      # Allow DNS from localhost
+      iptables -A nixos-fw -p udp -s 127.0.0.1 -d 127.0.0.1 --dport 53 -j ACCEPT
+      iptables -A nixos-fw -p tcp -s 127.0.0.1 -d 127.0.0.1 --dport 53 -j ACCEPT
+      # Allow DNS from local network to local DNS server
+      iptables -A nixos-fw -p udp -s 192.168.3.0/24 -d 192.168.3.100 --dport 53 -j ACCEPT
+      iptables -A nixos-fw -p tcp -s 192.168.3.0/24 -d 192.168.3.100 --dport 53 -j ACCEPT
+    '';
   };
 
   time.timeZone = "Europe/Berlin";
@@ -103,4 +97,22 @@
   ];
 
   system.stateVersion = "25.11";
+
+  age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+
+  age.secrets = {
+    cloudflare-token = {
+      file = ./secrets/cloudflare-token.age;
+      mode = "400";
+    };
+    cloudflare-env = {
+      file = ./secrets/cloudflare-env.age;
+      mode = "400";
+    };
+    traefik-auth = {
+      file = ./secrets/traefik-auth.age;
+      mode = "400";
+      owner = "traefik";
+    };
+  };
 }

@@ -69,6 +69,25 @@
               }];
             };
           };
+          dns-ui = {
+            rule = "Host(`dns.husmann.me`)";
+            service = "adguardhome-ui";
+            middlewares = [ "allow-local@file" ];
+            entryPoints = [ "websecure" ];
+            tls = {
+              certResolver = "letsencrypt";
+              domains = [{
+                main = "husmann.me";
+                sans = [ "*.husmann.me" ];
+              }];
+            };
+          };
+        };
+
+        services = {
+          adguardhome-ui.loadBalancer.servers = [{
+            url = "http://192.168.3.100:3000";
+          }];
         };
       };
     };
